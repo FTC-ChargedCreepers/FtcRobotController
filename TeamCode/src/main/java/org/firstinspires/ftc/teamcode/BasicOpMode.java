@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -56,14 +57,13 @@ import java.util.Locale;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic: Linear OpMode ChargedCreeper", group="Linear OpMode")
-public class BasicOpMode_Linear extends OpMode {
+@TeleOp(name="Basic: OpMode ChargedCreeper", group="OpMode")
+public class BasicOpMode extends OpMode {
     private final ElapsedTime runtime = new ElapsedTime();
-    private DcMotor frontRight, frontLeft, backRight, backLeft, flywheel;
-    public CRServo leftServo, rightServo;
+    private DcMotor frontRight, frontLeft, backRight, backLeft;
+    private DcMotorEx flywheel;
+    private CRServo leftServo, rightServo;
     private boolean servoIsRunning;
-    private boolean flywheelOn = false;
-    private boolean lastX = false;
     private GoBildaPinpointDriver odo;
 
     @Override
@@ -75,17 +75,21 @@ public class BasicOpMode_Linear extends OpMode {
         frontLeft = hardwareMap.get(DcMotor.class, "leftFront");
         backRight = hardwareMap.get(DcMotor.class, "rightBack");
         backLeft = hardwareMap.get(DcMotor.class, "leftBack");
-        flywheel = hardwareMap.get(DcMotor.class, "flywheel");
+        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         leftServo = hardwareMap.get(CRServo.class, "leftServo");
         rightServo = hardwareMap.get(CRServo.class, "rightServo");
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
         backRight.setDirection(DcMotor.Direction.REVERSE);
+        flywheel.setDirection(DcMotorEx.Direction.FORWARD);
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         servoIsRunning = false;
         odo.setOffsets(-84.0, -168.0, DistanceUnit.MM); //these are tuned for 3110-0002-0001 Product Insight #1
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         odo.resetPosAndIMU();
         telemetry.addData("Status", "Initialized");
+        telemetry.addData("flywheel motor enabled", flywheel.isMotorEnabled());
         telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
         telemetry.addData("Y offset", odo.getYOffset(DistanceUnit.MM));
         telemetry.addData("Device Version Number:", odo.getDeviceVersion());
@@ -135,14 +139,18 @@ public class BasicOpMode_Linear extends OpMode {
             odo.recalibrateIMU(); //recalibrates the IMU without resetting position
         }
 
+        telemetry.addData("ServoIsRunning", servoIsRunning);
         if (servoIsRunning) {
             leftServo.setPower(-1);
             rightServo.setPower(1);
-            flywheel.setPower(1.0);
+            flywheel.setVelocity(500);
+            telemetry.addData("Flywheel velocity", "%.2f", flywheel.getVelocity());
         } else {
             leftServo.setPower(0);
             rightServo.setPower(0);
-            flywheel.setPower(0);
+            flywheel.setVelocity(0);
+            telemetry.addData("Flywheel stopped", "true");
+            telemetry.addData("Flywheel velocity", "%.2f", flywheel.getVelocity());
         }
 
         odo.update();
@@ -156,7 +164,7 @@ public class BasicOpMode_Linear extends OpMode {
         telemetry.addData("Pinpoint Frequency", odo.getFrequency()); //prints/gets the current refresh rate of the Pinpoint
 
         // Show the elapsed game time and wheel power
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addData("Status", "Run Time: " + runtime);
         telemetry.addData(
                 "Motors",
                 "frontLeft (%.2f), frontRight (%.2f), backLeft (%.2f), backRight (%.2f)",
@@ -165,9 +173,6 @@ public class BasicOpMode_Linear extends OpMode {
                 speeds[2],
                 speeds[3]);
 
-        telemetry.addData("ServoIsRunning", servoIsRunning);
-        telemetry.addData("Flywheel", flywheelOn ? "ON" : "OFF");
-        telemetry.addData("Flywheel Power", "%.2f", flywheel.getPower());
         telemetry.update();
     }
 }
