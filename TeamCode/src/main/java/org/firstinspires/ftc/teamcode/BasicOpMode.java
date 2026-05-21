@@ -99,37 +99,7 @@ public class BasicOpMode extends OpMode {
 
     @Override
     public void loop() {
-        // Mecanum drive is controlled with three axes: drive (front-and-back),
-        // strafe (left-and-right), and twist (rotating the whole chassis).
-        double drive = -gamepad1.left_stick_y;
-        double strafe = gamepad1.left_stick_x;
-        double turn = gamepad1.right_stick_x;
-
-        double[] speeds = {
-            (drive + strafe + turn),
-            (drive - strafe - turn),
-            (drive - strafe + turn),
-            (drive + strafe - turn)
-        };
-
-        // Loop through all values in the speeds[] array and find the greatest
-        // *magnitude*.  Not the greatest velocity.
-        double max = Math.abs(speeds[0]);
-        for (double speed : speeds) {
-            if (max < Math.abs(speed)) max = Math.abs(speed);
-        }
-
-        // If and only if the maximum is outside the range we want it to be,
-        // normalize all the other speeds based on the given speed value.
-        if (max > 1) {
-            for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
-        }
-
-        // apply the calculated values to the motors.
-        frontLeft.setPower(speeds[0]);
-        frontRight.setPower(speeds[1]);
-        backLeft.setPower(speeds[2]);
-        backRight.setPower(speeds[3]);
+        driveFieldRelative(- gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
         if (gamepad1.a) {
             servoIsRunning = true;
@@ -165,6 +135,37 @@ public class BasicOpMode extends OpMode {
 
         // Show the elapsed game time and wheel power
         telemetry.addData("Status", "Run Time: " + runtime);
+        telemetry.update();
+    }
+
+    private void drive(double drive, double strafe, double turn) {
+        // Mecanum drive is controlled with three axes: drive (front-and-back),
+        // strafe (left-and-right), and twist (rotating the whole chassis).
+        double[] speeds = {
+                (drive + strafe + turn),
+                (drive - strafe - turn),
+                (drive - strafe + turn),
+                (drive + strafe - turn)
+        };
+
+        // Loop through all values in the speeds[] array and find the greatest
+        // *magnitude*.  Not the greatest velocity.
+        double max = Math.abs(speeds[0]);
+        for (double speed : speeds) {
+            if (max < Math.abs(speed)) max = Math.abs(speed);
+        }
+
+        // If and only if the maximum is outside the range we want it to be,
+        // normalize all the other speeds based on the given speed value.
+        if (max > 1) {
+            for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
+        }
+
+        // apply the calculated values to the motors.
+        frontLeft.setPower(speeds[0]);
+        frontRight.setPower(speeds[1]);
+        backLeft.setPower(speeds[2]);
+        backRight.setPower(speeds[3]);
         telemetry.addData(
                 "Motors",
                 "frontLeft (%.2f), frontRight (%.2f), backLeft (%.2f), backRight (%.2f)",
@@ -172,7 +173,17 @@ public class BasicOpMode extends OpMode {
                 speeds[1],
                 speeds[2],
                 speeds[3]);
+    }
 
-        telemetry.update();
+    private void driveFieldRelative(double drive, double strafe, double turn) {
+        double theta = Math.atan2(drive, strafe);
+        double r = Math.hypot(strafe, drive);
+
+        theta = AngleUnit.normalizeDegrees(theta - odo.getHeading(AngleUnit.RADIANS));
+
+        double newForward = r * Math.sin(theta);
+        double newStrafe = r * Math.cos(theta);
+
+        drive(newForward, newStrafe, turn);
     }
 }
