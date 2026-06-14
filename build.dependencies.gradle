@@ -1,8 +1,9 @@
 repositories {
     mavenCentral()
     google() // Needed for androidx
-    maven { url = 'https://mymaven.bylazar.com/releases' } // Your existing repository
-    maven { url = 'https://maven.brott.dev/' }      // FTC Dashboard
+    maven { url = 'https://maven.brott.dev/' }
+    maven { url = 'https://maven.pedropathing.com' }
+    maven { url = "https://mymaven.bylazar.com/releases" }
 }
 dependencies {
     implementation 'org.firstinspires.ftc:Inspection:11.1.0'
@@ -16,7 +17,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.pedropathing:ftc:2.1.2'
     implementation 'com.pedropathing:telemetry:1.0.0'
-    implementation 'com.bylazar:fullpanels:1.0.12'
-    implementation 'com.acmerobotics.dashboard:dashboard:0.+'
+    implementation 'com.bylazar:fullpanels:1.0.7'
+    implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
 }
 
