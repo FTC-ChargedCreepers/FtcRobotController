@@ -13,12 +13,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
-    public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(8.3)
-            .forwardZeroPowerAcceleration(-30.76994149927475)
-            .lateralZeroPowerAcceleration(-49.244087541016555)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.04, 0, 0.00125,0.024))
-            .headingPIDFCoefficients(new PIDFCoefficients(0.64,0,0.05, 0.03));
+    public static FollowerConstants followerConstants =
+            new FollowerConstants()
+                    .mass(8.3)
+                    .forwardZeroPowerAcceleration(-30.76994149927475)
+                    .lateralZeroPowerAcceleration(-49.244087541016555)
+                    .translationalPIDFCoefficients(new PIDFCoefficients(0.04, 0, 0.00125, 0.024))
+                    .headingPIDFCoefficients(new PIDFCoefficients(0.64, 0, 0.05, 0.03));
     public static MecanumConstants driveConstants =
             new MecanumConstants()
                     .maxPower(1)
@@ -33,10 +34,7 @@ public class Constants {
                     .xVelocity(66.73178364911418)
                     .yVelocity(56.74286513441191);
     // need velocity data from gamepad
-    public static PathConstraints pathConstraints = new PathConstraints(0.99,
-            100,
-            1,
-            1);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
     public static PinpointConstants localizerConstants =
             new PinpointConstants()
                     // distance needs to be changed later
