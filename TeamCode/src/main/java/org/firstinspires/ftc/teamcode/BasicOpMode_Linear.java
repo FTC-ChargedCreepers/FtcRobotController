@@ -29,7 +29,11 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Range;
 import android.util.Size;
+
+import com.pedropathing.follower.Follower;
+import com.pedropathing.math.MathFunctions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -81,13 +85,26 @@ public class BasicOpMode_Linear extends OpMode {
 
     private static final boolean USE_WEBCAM = true; // true for webcam, false for phone camera
     private AprilTagProcessor aprilTag;
+    private AprilTagDetection desiredTag;
     private VisionPortal visionPortal;
+
+    private double DESIRED_TAG_ID = 24;
+    private Follower follower;
+
+    private static final double getTriangleAngle(double oppositeLeg, double adjacentLeg) {
+        return Math.toDegrees(Math.atan2(oppositeLeg, adjacentLeg));
+    }
+
+    private static double getVelocity(double goalDist){
+        return MathFunctions.clamp(0.0470181*Math.pow(goalDist, 2)- 0.083729*goalDist +1233.60264, 0 , 2000);
+    }
 
     @Override
     public void init() {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
+        follower = Constants.createFollower(hardwareMap);
         frontRight = hardwareMap.get(DcMotor.class, "rightFront");
         frontLeft = hardwareMap.get(DcMotor.class, "leftFront");
         backRight = hardwareMap.get(DcMotor.class, "rightBack");
@@ -115,6 +132,8 @@ public class BasicOpMode_Linear extends OpMode {
         telemetry.addData("Device Version Number:", odo.getDeviceVersion());
         telemetry.addData("Heading Scalar", odo.getYawScalar());
         telemetry.update();
+        odo.setPosX(72, DistanceUnit.INCH);
+        odo.setPosY(14.5, DistanceUnit.INCH);
 
         initAprilTag();
     }
@@ -190,16 +209,21 @@ public class BasicOpMode_Linear extends OpMode {
 
         if (gamepad1.a) {
             servoIsRunning = true;
-            odo.resetPosAndIMU(); // resets the position to 0 and recalibrates the IMU
         } else if (gamepad1.b) {
             servoIsRunning = false;
-            odo.recalibrateIMU(); // recalibrates the IMU without resetting position
         }
+        if (gamepad1.x){
+            follower.turnTo(Math.toRadians(getTriangleAngle(
+                    130-odo.getPosX(DistanceUnit.INCH),
+                    130-odo.getPosY(DistanceUnit.INCH))));
+        }
+        desiredTag = findDesiredTag();
 
         if (servoIsRunning) {
             leftServo.setPower(-1);
             rightServo.setPower(1);
-            flywheel.setVelocity(2600);
+            flywheel.setVelocity(getVelocity(
+                    Math.sqrt(Math.pow(130-odo.getPosX(DistanceUnit.INCH), 2) + Math.pow(130-odo.getPosY(DistanceUnit.INCH), 2))));
         } else {
             leftServo.setPower(0);
             rightServo.setPower(0);
@@ -258,6 +282,18 @@ public class BasicOpMode_Linear extends OpMode {
         telemetryAprilTag();
 
         telemetry.update();
+
+    }
+
+    private AprilTagDetection findDesiredTag() {
+        List <AprilTagDetection> currentDetections = aprilTag.getDetections();
+
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.id == DESIRED_TAG_ID) {
+                return detection;
+            }
+        }
+        return null;
     }
 
     private void telemetryAprilTag() {
