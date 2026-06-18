@@ -5,6 +5,7 @@ import android.util.Size;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.MathFunctions;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -184,6 +185,10 @@ public class AutoShootV2 extends OpMode {
             case FLYWHEEL_ACCELERATING:
                 stopDrive();
 
+                desiredTag = findDesiredTag();
+
+                getVelocity(desiredTag.ftcPose.range);
+
                 flywheel.setVelocity(desiredFlywheelVel);
                 currentFlywheelVel = flywheel.getVelocity();
 
@@ -205,8 +210,8 @@ public class AutoShootV2 extends OpMode {
                 rightServo.setPower(1);
 
 
-                if (framesAfterShot > 100) {
-                    flywheel.setVelocity(0);
+                if (framesAfterShot > 200) {
+                    flywheel.setVelocity(1000);
                     leftServo.setPower(0);
                     rightServo.setPower(0);
                     state = State.BUILD_RETURN_PATH;
@@ -263,6 +268,10 @@ public class AutoShootV2 extends OpMode {
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Flywheel Velocity", flywheel.getVelocity());
         telemetry.update();
+    }
+
+    private static double getVelocity(double goalDist){
+        return MathFunctions.clamp(0.0470181*Math.pow(goalDist, 2)- 0.083729*goalDist +1233.60264, 0 , 2000);
     }
 
     public void moveRobot(double drive, double strafe, double turn) {
