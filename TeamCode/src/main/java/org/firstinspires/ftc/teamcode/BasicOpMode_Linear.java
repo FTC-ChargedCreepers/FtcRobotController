@@ -115,7 +115,7 @@ public class BasicOpMode_Linear extends OpMode {
         leftServo = hardwareMap.get(CRServo.class, "leftServo");
         rightServo = hardwareMap.get(CRServo.class, "rightServo");
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
-        backRight.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
         servoIsRunning = false;
         odo.setOffsets(
                 -84.0,
