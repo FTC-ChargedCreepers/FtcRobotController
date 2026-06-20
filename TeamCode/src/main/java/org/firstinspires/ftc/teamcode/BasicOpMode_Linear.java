@@ -77,6 +77,17 @@ public class BasicOpMode_Linear extends OpMode {
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
 
+    private enum TagAlignState {
+        IDLE,
+        FIND_TAG,
+        CENTER_TAG
+    }
+
+    private static final int DESIRED_TAG_ID = 24;
+    private TagAlignState tagAlignState = TagAlignState.IDLE;
+    private boolean lastXButton = false;
+    private int centeringFrames = 0;
+
     @Override
     public void init() {
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -182,11 +193,30 @@ public class BasicOpMode_Linear extends OpMode {
 
     @Override
     public void loop() {
-        // Mecanum drive is controlled with three axes: drive (front-and-back),
-        // strafe (left-and-right), and twist (rotating the whole chassis).
-        double drive = -gamepad1.left_stick_y;
-        double strafe = gamepad1.left_stick_x;
-        double turn = gamepad1.right_stick_x;
+        boolean xButton = gamepad1.x;
+        if (xButton && !lastXButton && tagAlignState == TagAlignState.IDLE) {
+            tagAlignState = TagAlignState.FIND_TAG;
+            centeringFrames = 0;
+        }
+        lastXButton = xButton;
+
+        double drive;
+        double strafe;
+        double turn;
+
+        if (tagAlignState != TagAlignState.IDLE) {
+            // X was pressed: turn the robot in place until the camera centers on the AprilTag,
+            // then hand control back to the driver.
+            drive = 0;
+            strafe = 0;
+            turn = updateTagAlignment();
+        } else {
+            // Mecanum drive is controlled with three axes: drive (front-and-back),
+            // strafe (left-and-right), and twist (rotating the whole chassis).
+            drive = -gamepad1.left_stick_y;
+            strafe = gamepad1.left_stick_x;
+            turn = gamepad1.right_stick_x;
+        }
 
         double[] speeds = {
             (drive + strafe + turn),
@@ -280,10 +310,62 @@ public class BasicOpMode_Linear extends OpMode {
 
         telemetry.addData("ServoIsRunning", servoIsRunning);
         telemetry.addData("Flywheel Velocity", flywheel.getVelocity());
+        telemetry.addData("Tag Align State", tagAlignState);
 
         telemetryAprilTag();
 
         telemetry.update();
+    }
+
+    /**
+     * Turns the robot in place to find and then center on DESIRED_TAG_ID, mirroring the
+     * FIND_TAG / CENTER_TAG states from AutoShootV1. Returns the turn power to apply this loop;
+     * sets tagAlignState back to IDLE once the tag is centered.
+     */
+    private double updateTagAlignment() {
+        AprilTagDetection desiredTag = findDesiredTag();
+
+        switch (tagAlignState) {
+            case FIND_TAG:
+                if (desiredTag == null) {
+                    return 0.2; // keep turning to scan for the tag
+                }
+                centeringFrames = 0;
+                tagAlignState = TagAlignState.CENTER_TAG;
+                return 0;
+
+            case CENTER_TAG:
+                if (desiredTag == null) {
+                    // Lost the tag while centering; go back to scanning for it.
+                    tagAlignState = TagAlignState.FIND_TAG;
+                    return 0.2;
+                }
+
+                double offset = desiredTag.ftcPose.x;
+                if (Math.abs(offset) > 2.0) {
+                    centeringFrames = 0;
+                    return Math.max(-0.25, Math.min(0.25, offset * 0.03));
+                }
+
+                centeringFrames++;
+                if (centeringFrames > 10) {
+                    tagAlignState = TagAlignState.IDLE;
+                }
+                return 0;
+
+            default:
+                return 0;
+        }
+    }
+
+    private AprilTagDetection findDesiredTag() {
+        List<AprilTagDetection> detections = aprilTag.getDetections();
+        for (AprilTagDetection detection : detections) {
+            if (detection.metadata != null && detection.id == DESIRED_TAG_ID) {
+                return detection;
+            }
+        }
+        return null;
     }
 
     private void telemetryAprilTag() {
