@@ -40,6 +40,8 @@ Hardware is accessed via `hardwareMap.get(DcMotor.class, "name")` where `"name"`
 
 ## ChargedCreeper robot — hardware config and conventions
 
+> **OpMode walkthroughs:** [`AutoShootV1`](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AutoShootV1.md) — vision-driven AprilTag-aligned autonomous shooter (FSM diagram + state-by-state notes).
+
 The team's current robot (as wired in `BasicOpMode_Linear` and `AutoSquare_Linear`) uses these `hardwareMap` names — keep them stable across new OpModes so they line up with the on-device config:
 
 - **Drive motors** (4-wheel mecanum): `"leftFront"`, `"rightFront"`, `"leftBack"`, `"rightBack"`

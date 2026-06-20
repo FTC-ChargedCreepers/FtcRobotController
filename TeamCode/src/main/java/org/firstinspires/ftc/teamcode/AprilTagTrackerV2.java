@@ -6,9 +6,11 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
@@ -19,15 +21,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.firstinspires.ftc.teamcode.Tuning.stopRobot;
-
-
 @Autonomous(name = "AprilTag Tracker V2")
-
 public class AprilTagTrackerV2 extends OpMode {
 
     private Follower follower;
@@ -57,7 +51,6 @@ public class AprilTagTrackerV2 extends OpMode {
 
     private int centeringFramesCount = 0; // Ensures it holds center for a moment
 
-
     @Override
     public void init() {
 
@@ -65,10 +58,10 @@ public class AprilTagTrackerV2 extends OpMode {
 
         initAprilTag();
 
-        frontLeftDrive  = hardwareMap.get(DcMotor.class, "leftFront");
+        frontLeftDrive = hardwareMap.get(DcMotor.class, "leftFront");
         frontRightDrive = hardwareMap.get(DcMotor.class, "rightFront");
-        backLeftDrive   = hardwareMap.get(DcMotor.class, "leftBack");
-        backRightDrive  = hardwareMap.get(DcMotor.class, "rightBack");
+        backLeftDrive = hardwareMap.get(DcMotor.class, "leftBack");
+        backRightDrive = hardwareMap.get(DcMotor.class, "rightBack");
 
         // Single motor reverse layout adjusted to your chassis configuration
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -102,7 +95,8 @@ public class AprilTagTrackerV2 extends OpMode {
         // Fetch current visibility frame
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         for (AprilTagDetection detection : currentDetections) {
-            if (detection.metadata != null && ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))) {
+            if (detection.metadata != null
+                    && ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))) {
                 targetFound = true;
                 desiredTag = detection;
                 break;
@@ -126,7 +120,7 @@ public class AprilTagTrackerV2 extends OpMode {
                 // Clip power to keep movements predictable and slow
                 turnPower = Math.max(-0.25, Math.min(0.25, turnPower));
 
-                //follower.turn();
+                // follower.turn();
 
                 // Pivot on the spot toward the tag
                 moveRobot(0, 0, turnPower);
@@ -139,13 +133,16 @@ public class AprilTagTrackerV2 extends OpMode {
                 if (centeringFramesCount > 10) { // Stable for 10 frames straight
                     telemetry.addLine("\n> Target Found and Locked");
 
-                    // Corrects the yaw measurement to account for the upside-down camera orientation
+                    // Corrects the yaw measurement to account for the upside-down camera
+                    // orientation
                     double yaw = Math.toRadians(-desiredTag.ftcPose.yaw);
 
                     robotHeading = Math.toRadians(37) - yaw;
 
-                    double horizontal = desiredTag.ftcPose.range * (Math.sin(yaw + Math.toRadians(53)));
-                    double vertical = desiredTag.ftcPose.range * (Math.cos(yaw + Math.toRadians(53)));
+                    double horizontal =
+                            desiredTag.ftcPose.range * (Math.sin(yaw + Math.toRadians(53)));
+                    double vertical =
+                            desiredTag.ftcPose.range * (Math.cos(yaw + Math.toRadians(53)));
                     double tagFieldX = 129.1227;
                     double tagFieldY = 126.3925;
 
@@ -183,7 +180,6 @@ public class AprilTagTrackerV2 extends OpMode {
         } else {
             telemetry.addLine("No AprilTag was found before START was pressed");
         }
-
     }
 
     public void loop() {
@@ -197,7 +193,7 @@ public class AprilTagTrackerV2 extends OpMode {
             // The path has finished executing naturally!
             if (!end) {
                 end = true;
-                 moveRobot(0,0,0);
+                moveRobot(0, 0, 0);
             }
             telemetry.addLine("Path Execution Complete");
         }
@@ -205,15 +201,16 @@ public class AprilTagTrackerV2 extends OpMode {
         // Print real-time status updates directly to your Driver Station
         telemetry.addData("Current X Position", follower.getPose().getX());
         telemetry.addData("Current Y Position", follower.getPose().getY());
-        //telemetry.addData("AprilTag Range", desiredTag.ftcPose.range);
+        // telemetry.addData("AprilTag Range", desiredTag.ftcPose.range);
         telemetry.update();
     }
+
     public void moveRobot(double drive, double strafe, double turn) {
         double[] speeds = {
-                (drive + strafe + turn),
-                (drive - strafe - turn),
-                (drive - strafe + turn),
-                (drive + strafe - turn)
+            (drive + strafe + turn),
+            (drive - strafe - turn),
+            (drive - strafe + turn),
+            (drive + strafe - turn)
         };
 
         double max = Math.abs(speeds[0]);
@@ -232,18 +229,20 @@ public class AprilTagTrackerV2 extends OpMode {
     }
 
     private void initAprilTag() {
-        AprilTagLibrary testLibrary = new AprilTagLibrary.Builder()
-                .addTag(6, "FIH", 6.8125, DistanceUnit.INCH)
-                .addTag(24, "RED", 6.5, DistanceUnit.INCH)
-                .addTag(20, "BLUE", 6.5, DistanceUnit.INCH)
-                .build();
+        AprilTagLibrary testLibrary =
+                new AprilTagLibrary.Builder()
+                        .addTag(6, "FIH", 6.8125, DistanceUnit.INCH)
+                        .addTag(24, "RED", 6.5, DistanceUnit.INCH)
+                        .addTag(20, "BLUE", 6.5, DistanceUnit.INCH)
+                        .build();
 
-        aprilTag = new AprilTagProcessor.Builder()
-                .setDrawTagOutline(true)
-                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
-                .setTagLibrary(testLibrary)
-                .setLensIntrinsics(243.0, 243.0, 320.0, 240.0)
-                .build();
+        aprilTag =
+                new AprilTagProcessor.Builder()
+                        .setDrawTagOutline(true)
+                        .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                        .setTagLibrary(testLibrary)
+                        .setLensIntrinsics(243.0, 243.0, 320.0, 240.0)
+                        .build();
 
         aprilTag.setDecimation(3);
 
@@ -274,7 +273,7 @@ public class AprilTagTrackerV2 extends OpMode {
         if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
             exposureControl.setMode(ExposureControl.Mode.Manual);
         }
-        exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
+        exposureControl.setExposure((long) exposureMS, TimeUnit.MILLISECONDS);
 
         GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
         gainControl.setGain(gain);

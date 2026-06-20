@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -10,8 +9,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
@@ -21,10 +21,6 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 
 @Autonomous(name = "AutoShootV1")
 public class AutoShootV1 extends OpMode {
@@ -98,8 +94,8 @@ public class AutoShootV1 extends OpMode {
 
     @Override
     public void init_loop() {
-        if (!exposureConfigured &&
-                visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
+        if (!exposureConfigured
+                && visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
 
             setManualExposure(6, 50);
             exposureConfigured = true;
@@ -143,27 +139,19 @@ public class AutoShootV1 extends OpMode {
                         centeringFrames++;
                         if (centeringFrames > 10) {
                             calculateRobotPose();
-                            follower.setStartingPose(
-                                    new Pose(fieldX, fieldY, robotHeading));
+                            follower.setStartingPose(new Pose(fieldX, fieldY, robotHeading));
                             state = State.BUILD_PATH;
                         }
                     }
-                }else {
-                        stopDrive();
+                } else {
+                    stopDrive();
                 }
 
                 break;
             case BUILD_PATH:
+                path = new Path(new BezierLine(new Pose(fieldX, fieldY), new Pose(70.75, 80)));
 
-                path = new Path(
-                        new BezierLine(
-                                new Pose(fieldX, fieldY),
-                                new Pose(70.75, 80)
-                        ));
-
-                path.setLinearHeadingInterpolation(
-                        robotHeading,
-                        Math.toRadians(40));
+                path.setLinearHeadingInterpolation(robotHeading, Math.toRadians(40));
 
                 follower.followPath(path);
 
@@ -171,7 +159,6 @@ public class AutoShootV1 extends OpMode {
                 break;
 
             case FOLLOW_PATH:
-
                 follower.update();
 
                 if (!follower.isBusy()) {
@@ -204,7 +191,6 @@ public class AutoShootV1 extends OpMode {
                 leftServo.setPower(-1);
                 rightServo.setPower(1);
 
-
                 if (framesAfterShot > 100) {
                     flywheel.setVelocity(0);
                     leftServo.setPower(0);
@@ -215,34 +201,26 @@ public class AutoShootV1 extends OpMode {
                 break;
 
             case BUILD_RETURN_PATH:
-
                 desiredTag = findDesiredTag();
 
                 if (desiredTag != null) {
                     calculateRobotPose();
 
-                    path = new Path(
-                            new BezierLine(
-                                    new Pose(fieldX, fieldY),
-                                    new Pose(140, 20)
-                            ));
+                    path = new Path(new BezierLine(new Pose(fieldX, fieldY), new Pose(140, 20)));
 
-                    path.setLinearHeadingInterpolation(
-                            Math.toRadians(37),
-                            Math.toRadians(90));
+                    path.setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(90));
 
                     follower.followPath(path);
 
                     state = State.FOLLOW_RETURN_PATH;
 
-                }else {
+                } else {
                     stopDrive();
                 }
 
                 break;
 
             case FOLLOW_RETURN_PATH:
-
                 follower.update();
 
                 if (!follower.isBusy()) {
@@ -267,10 +245,10 @@ public class AutoShootV1 extends OpMode {
 
     public void moveRobot(double drive, double strafe, double turn) {
         double[] speeds = {
-                (drive + strafe + turn),
-                (drive - strafe - turn),
-                (drive - strafe + turn),
-                (drive + strafe - turn)
+            (drive + strafe + turn),
+            (drive - strafe - turn),
+            (drive - strafe + turn),
+            (drive + strafe - turn)
         };
 
         double max = Math.abs(speeds[0]);
@@ -289,18 +267,20 @@ public class AutoShootV1 extends OpMode {
     }
 
     private void initAprilTag() {
-        AprilTagLibrary testLibrary = new AprilTagLibrary.Builder()
-                .addTag(6, "FIH", 6.8125, DistanceUnit.INCH)
-                .addTag(24, "RED", 6.5, DistanceUnit.INCH)
-                .addTag(20, "BLUE", 6.5, DistanceUnit.INCH)
-                .build();
+        AprilTagLibrary testLibrary =
+                new AprilTagLibrary.Builder()
+                        .addTag(6, "FIH", 6.8125, DistanceUnit.INCH)
+                        .addTag(24, "RED", 6.5, DistanceUnit.INCH)
+                        .addTag(20, "BLUE", 6.5, DistanceUnit.INCH)
+                        .build();
 
-        aprilTag = new AprilTagProcessor.Builder()
-                .setDrawTagOutline(true)
-                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
-                .setTagLibrary(testLibrary)
-                .setLensIntrinsics(243.0, 243.0, 320.0, 240.0)
-                .build();
+        aprilTag =
+                new AprilTagProcessor.Builder()
+                        .setDrawTagOutline(true)
+                        .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                        .setTagLibrary(testLibrary)
+                        .setLensIntrinsics(243.0, 243.0, 320.0, 240.0)
+                        .build();
 
         aprilTag.setDecimation(3);
 
@@ -372,6 +352,5 @@ public class AutoShootV1 extends OpMode {
 
         fieldX = tagFieldX - horizontal;
         fieldY = tagFieldY - vertical;
-
     }
 }
