@@ -122,7 +122,7 @@ public class AutoShootV2 extends OpMode {
             case FIND_TAG:
                 desiredTag = findDesiredTag();
                 if (desiredTag == null) {
-                    moveRobot(0, 0, 0.2);
+                    follower.turn(0.1);
                     telemetry.addLine("Scanning...");
                 } else {
                     stopDrive();
@@ -134,43 +134,38 @@ public class AutoShootV2 extends OpMode {
                 desiredTag = findDesiredTag();
 
                 if (desiredTag != null) {
-                    double offset = desiredTag.ftcPose.x;
-                    if (Math.abs(offset) > 2.0) {
-                        centeringFrames = 0;
-                        double turn = Math.max(-0.25, Math.min(0.25, offset * 0.03));
-                        moveRobot(0, 0, turn);
-                    } else {
-                        stopDrive();
-                        centeringFrames++;
-                        if (centeringFrames > 10) {
-                            calculateRobotPose();
-                            follower.setStartingPose(
-                                    new Pose(fieldX, fieldY, robotHeading));
-                            state = State.BUILD_PATH;
-                        }
-                    }
+                    double offsetAngle = desiredTag.ftcPose.bearing;
+
+                    follower.turn(offsetAngle);
+
+
+
+                    state = State.BUILD_PATH;
+
                 }else {
-                    stopDrive();
+                    follower.turn(-0.1);
                 }
 
                 break;
             case BUILD_PATH:
 
-                path = new Path(
-                        new BezierLine(
-                                new Pose(fieldX, fieldY),
-                                new Pose(70.75, 80)
-                        ));
+                if (!follower.isBusy()) {
+                    path = new Path(
+                            new BezierLine(
+                                    new Pose(fieldX, fieldY),
+                                    new Pose(70.75, 80)
+                            ));
 
-                path.setLinearHeadingInterpolation(
-                        robotHeading,
-                        Math.toRadians(40));
+                    path.setLinearHeadingInterpolation(
+                            robotHeading,
+                            Math.toRadians(40));
 
-                follower.followPath(path);
+                    follower.followPath(path);
 
-                state = State.FOLLOW_PATH;
+                    state = State.FOLLOW_PATH;
+                }
+
                 break;
-
             case FOLLOW_PATH:
 
                 follower.update();
