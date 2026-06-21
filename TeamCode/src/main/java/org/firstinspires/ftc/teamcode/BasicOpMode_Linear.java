@@ -305,32 +305,40 @@ public class BasicOpMode_Linear extends OpMode {
         switch (tagAlignState) {
             case FIND_TAG:
                 if (desiredTag == null) {
-                    return 0.2; // keep turning to scan for the tag
+                    telemetry.addLine("keep find tag");
+                    return -0.1; // keep turning to scan for the tag
                 }
                 centeringFrames = 0;
                 tagAlignState = TagAlignState.CENTER_TAG;
+                stopDrive();
+                telemetry.addLine("find center tag");
                 return 0;
 
             case CENTER_TAG:
                 if (desiredTag == null) {
                     // Lost the tag while centering; go back to scanning for it.
-                    tagAlignState = TagAlignState.FIND_TAG;
-                    return 0.2;
+                    telemetry.addLine("can't find desired tag in center tag state");
+                    return -0.1;
                 }
 
                 double offset = desiredTag.ftcPose.x;
                 if (Math.abs(offset) > 2.0) {
                     centeringFrames = 0;
-                    return Math.max(-0.25, Math.min(0.25, offset * 0.03));
+                    double turnValue = -Math.max(-0.2, Math.min(0.2, offset * 0.01));
+                    telemetry.addLine(String.format("offset %f turn value %f", offset, turnValue));
+                    return turnValue;
+                } else {
+                    stopDrive();
+                    centeringFrames++;
+                    if (centeringFrames > 10) {
+                        tagAlignState = TagAlignState.IDLE;
+                        telemetry.addLine("centered tag and goback to idle");
+                    }
+                    return 0;
                 }
-
-                centeringFrames++;
-                if (centeringFrames > 10) {
-                    tagAlignState = TagAlignState.IDLE;
-                }
-                return 0;
 
             default:
+                stopDrive();
                 return 0;
         }
     }
@@ -430,4 +438,29 @@ public class BasicOpMode_Linear extends OpMode {
         telemetry.update();
     }
 
+    private void stopDrive() {
+        moveRobot(0, 0, 0);
+    }
+    public void moveRobot(double drive, double strafe, double turn) {
+        double[] speeds = {
+                (drive + strafe + turn),
+                (drive - strafe - turn),
+                (drive - strafe + turn),
+                (drive + strafe - turn)
+        };
+
+        double max = Math.abs(speeds[0]);
+        for (double speed : speeds) {
+            if (max < Math.abs(speed)) max = Math.abs(speed);
+        }
+
+        if (max > 1) {
+            for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
+        }
+
+        frontLeft.setPower(speeds[0]);
+        frontRight.setPower(speeds[1]);
+        backLeft.setPower(speeds[2]);
+        backRight.setPower(speeds[3]);
+    }
 }
