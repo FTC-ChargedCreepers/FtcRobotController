@@ -105,7 +105,7 @@ public class DriveTest extends OpMode {
                 (drive - strafe + turn),
                 (drive + strafe - turn)
         };
-
+//ericcc
         // Loop through all values in the speeds[] array and find the greatest
         // *magnitude*.  Not the greatest velocity.
         double max = Math.abs(speeds[0]);
