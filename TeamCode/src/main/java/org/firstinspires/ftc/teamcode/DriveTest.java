@@ -68,7 +68,7 @@ import java.util.concurrent.TimeUnit;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 @Disabled
-@TeleOp(name = "Basic: Linear OpMode ChargedCreeper", group = "Linear OpMode")
+@TeleOp(name = "DriveTest", group = "OpMode")
 public class DriveTest extends OpMode {
 
     private DcMotor frontRight, frontLeft, backRight, backLeft;
