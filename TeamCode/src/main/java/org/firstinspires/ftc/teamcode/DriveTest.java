@@ -83,8 +83,8 @@ public class DriveTest extends OpMode {
         backRight = hardwareMap.get(DcMotor.class, "rightBack");
         backLeft = hardwareMap.get(DcMotor.class, "leftBack");
 
-        backRight.setDirection(DcMotor.Direction.REVERSE);
-        frontRight.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
