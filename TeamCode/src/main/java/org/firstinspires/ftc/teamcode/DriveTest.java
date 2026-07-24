@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -71,6 +72,7 @@ import java.util.concurrent.TimeUnit;
 public class DriveTest extends OpMode {
 
     private DcMotor frontRight, frontLeft, backRight, backLeft;
+    private GoBildaPinpointDriver odo;
 
 
     @Override
@@ -82,11 +84,27 @@ public class DriveTest extends OpMode {
         frontLeft = hardwareMap.get(DcMotor.class, "leftFront");
         backRight = hardwareMap.get(DcMotor.class, "rightBack");
         backLeft = hardwareMap.get(DcMotor.class, "leftBack");
+        odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
 
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
+        telemetry.update();
+        odo.setOffsets(
+                -84.0,
+                -168.0,
+                DistanceUnit.MM); // these are tuned for 3110-0002-0001 Product Insight #1
+        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        odo.setEncoderDirections(
+                GoBildaPinpointDriver.EncoderDirection.REVERSED,
+                GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        odo.resetPosAndIMU();
+        telemetry.addData("Status", "Initialized");
+        telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
+        telemetry.addData("Y offset", odo.getYOffset(DistanceUnit.MM));
+        telemetry.addData("Device Version Number:", odo.getDeviceVersion());
+        telemetry.addData("Heading Scalar", odo.getYawScalar());
         telemetry.update();
     }
 
@@ -98,6 +116,16 @@ public class DriveTest extends OpMode {
         double drive = -gamepad1.left_stick_y;
         double strafe = gamepad1.left_stick_x;
         double turn = gamepad1.right_stick_x;
+
+        double theta = Math.atan2(drive, strafe);
+        double r = Math.hypot(strafe, drive);
+
+        theta = AngleUnit.normalizeDegrees(theta - odo.getHeading(AngleUnit.RADIANS));
+
+        double newForward = r * Math.sin(theta);
+        double newStrafe = r * Math.cos(theta);
+
+        drive(newForward, newStrafe, turn);
 
         double[] speeds = {
                 (drive + strafe + turn),
@@ -124,6 +152,8 @@ public class DriveTest extends OpMode {
         frontRight.setPower(speeds[1]);
         backLeft.setPower(speeds[2]);
         backRight.setPower(speeds[3]);
+        odo.update();
+        Pose2D pos = odo.getPosition();
 
         telemetry.addData(
                 "Motors",
