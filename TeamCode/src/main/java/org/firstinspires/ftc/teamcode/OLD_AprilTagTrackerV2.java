@@ -22,7 +22,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @Autonomous(name = "AprilTag Tracker V2")
-public class AprilTagTrackerV2 extends OpMode {
+public class OLD_AprilTagTrackerV2 extends OpMode {
 
     private Follower follower;
     private DcMotor frontLeftDrive = null;

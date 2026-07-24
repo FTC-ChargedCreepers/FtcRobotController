@@ -40,9 +40,9 @@ Hardware is accessed via `hardwareMap.get(DcMotor.class, "name")` where `"name"`
 
 ## ChargedCreeper robot — hardware config and conventions
 
-> **OpMode walkthroughs:** [`AutoShootV1`](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AutoShootV1.md) — vision-driven AprilTag-aligned autonomous shooter (FSM diagram + state-by-state notes).
+> **OpMode walkthroughs:** [`OLD_AutoShootV1`](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/OLD_AutoShootV1.md) — vision-driven AprilTag-aligned autonomous shooter (FSM diagram + state-by-state notes).
 
-The team's current robot (as wired in `BasicOpMode_Linear` and `AutoSquare_Linear`) uses these `hardwareMap` names — keep them stable across new OpModes so they line up with the on-device config:
+The team's current robot (as wired in `OLD_BasicOpMode_Linear` and `OLD_AutoSquare_Linear`) uses these `hardwareMap` names — keep them stable across new OpModes so they line up with the on-device config:
 
 - **Drive motors** (4-wheel mecanum): `"leftFront"`, `"rightFront"`, `"leftBack"`, `"rightBack"`
   - `rightBack` must be set to `DcMotor.Direction.REVERSE` after lookup; the other three stay default. This compensates for how the motor is physically mounted — don't "fix" it by removing the reverse, and don't reverse the others.
@@ -70,7 +70,7 @@ Then normalize by the max absolute value if any wheel exceeds 1.0. The `rightBac
 Driver-Station names end with `ChargedCreeper` (e.g. `"Basic: Linear OpMode ChargedCreeper"`, `"Auto: Square Loop ChargedCreeper"`) so the team's OpModes are easy to spot in the menu. Use `group="Linear OpMode"` for both teleop and the team's autos.
 
 ### Style note
-`BasicOpMode_Linear` actually extends iterative `OpMode` (not `LinearOpMode`) despite its name — the file was forked from the SDK sample and renamed but kept the iterative structure. New autonomous code should extend `LinearOpMode` and use `runOpMode()` with `waitForStart()` + a `while (opModeIsActive())` loop; this is the style used by `AutoSquare_Linear`.
+`OLD_BasicOpMode_Linear` actually extends iterative `OpMode` (not `LinearOpMode`) despite its name — the file was forked from the SDK sample and renamed but kept the iterative structure. New autonomous code should extend `LinearOpMode` and use `runOpMode()` with `waitForStart()` + a `while (opModeIsActive())` loop; this is the style used by `OLD_AutoSquare_Linear`.
 
 ## Editing conventions specific to this SDK
 

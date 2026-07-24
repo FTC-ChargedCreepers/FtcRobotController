@@ -68,7 +68,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
  */
 
 @TeleOp(name = "Basic: Linear OpMode ChargedCreeper", group = "Linear OpMode")
-public class BasicOpMode_Linear extends OpMode {
+public class OLD_BasicOpMode_Linear extends OpMode {
     private final ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight, frontLeft, backRight, backLeft;
     private DcMotorEx flywheel;

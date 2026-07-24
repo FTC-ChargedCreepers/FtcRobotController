@@ -30,7 +30,7 @@ inside the `loop()` `switch` over the `State` enum, so the FSM advances one step
 | `follower` | — | Pedro `Follower` | Path follower built from `Constants.createFollower(...)` |
 
 > ⚠️ Note the drive-direction convention here **differs** from the rest of the codebase:
-> this OpMode reverses `frontLeftDrive`, whereas `BasicOpMode_Linear` / `AutoSquare_Linear`
+> this OpMode reverses `frontLeftDrive`, whereas `OLD_BasicOpMode_Linear` / `OLD_AutoSquare_Linear`
 > reverse `rightBack`. Keep this in mind when copying code between them.
 
 ### Important constants
