@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -68,7 +69,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
  */
 
 @TeleOp(name = "Basic: Linear OpMode ChargedCreeper", group = "Linear OpMode")
-public class BasicOpMode_Linear extends OpMode {
+@Disabled
+public class OLD_BasicOpMode_Linear extends OpMode {
     private final ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight, frontLeft, backRight, backLeft;
     private DcMotorEx flywheel;

@@ -6,10 +6,9 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -21,19 +20,16 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-
-@Autonomous(name = "AutoShootV1")
-public class AutoShootV1 extends OpMode {
+@Disabled
+@Autonomous(name = "AprilTag Tracker V3")
+public class OLD_AprilTagTrackerV3 extends OpMode {
 
     private enum State {
         FIND_TAG,
         CENTER_TAG,
         BUILD_PATH,
         FOLLOW_PATH,
-        FLYWHEEL_ACCELERATING,
-        SHOOTING,
-        BUILD_RETURN_PATH,
-        FOLLOW_RETURN_PATH
+        DONE
     }
 
     private State state = State.FIND_TAG;
@@ -44,10 +40,6 @@ public class AutoShootV1 extends OpMode {
     private DcMotor frontRightDrive;
     private DcMotor backLeftDrive;
     private DcMotor backRightDrive;
-
-    private DcMotorEx flywheel;
-
-    public CRServo leftServo, rightServo;
 
     private VisionPortal visionPortal;
     private AprilTagProcessor aprilTag;
@@ -63,10 +55,6 @@ public class AutoShootV1 extends OpMode {
     private double fieldY;
     private double robotHeading;
 
-    private double currentFlywheelVel;
-    private double desiredFlywheelVel = 1300;
-
-    private double framesAfterShot;
     private Path path;
 
     @Override
@@ -79,13 +67,6 @@ public class AutoShootV1 extends OpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "rightFront");
         backLeftDrive = hardwareMap.get(DcMotor.class, "leftBack");
         backRightDrive = hardwareMap.get(DcMotor.class, "rightBack");
-
-        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
-        flywheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        leftServo = hardwareMap.get(CRServo.class, "leftServo");
-        rightServo = hardwareMap.get(CRServo.class, "rightServo");
 
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
 
@@ -139,7 +120,6 @@ public class AutoShootV1 extends OpMode {
                         centeringFrames++;
                         if (centeringFrames > 10) {
                             calculateRobotPose();
-                            follower.setStartingPose(new Pose(fieldX, fieldY, robotHeading));
                             state = State.BUILD_PATH;
                         }
                     }
@@ -149,6 +129,8 @@ public class AutoShootV1 extends OpMode {
 
                 break;
             case BUILD_PATH:
+                follower.setStartingPose(new Pose(fieldX, fieldY, robotHeading));
+
                 path = new Path(new BezierLine(new Pose(fieldX, fieldY), new Pose(70.75, 80)));
 
                 path.setLinearHeadingInterpolation(robotHeading, Math.toRadians(40));
@@ -163,83 +145,19 @@ public class AutoShootV1 extends OpMode {
 
                 if (!follower.isBusy()) {
                     stopDrive();
-                    state = State.FLYWHEEL_ACCELERATING;
+                    state = State.DONE;
                 }
 
                 break;
 
-            case FLYWHEEL_ACCELERATING:
+            case DONE:
                 stopDrive();
-
-                flywheel.setVelocity(desiredFlywheelVel);
-                currentFlywheelVel = flywheel.getVelocity();
-
-                if (currentFlywheelVel > (desiredFlywheelVel - 100)) {
-                    framesAfterShot = 0;
-                    state = State.SHOOTING;
-                }
-                break;
-
-            case SHOOTING:
-                stopDrive();
-
-                flywheel.setVelocity(desiredFlywheelVel);
-                currentFlywheelVel = flywheel.getVelocity();
-
-                framesAfterShot++;
-
-                leftServo.setPower(-1);
-                rightServo.setPower(1);
-
-                if (framesAfterShot > 100) {
-                    flywheel.setVelocity(0);
-                    leftServo.setPower(0);
-                    rightServo.setPower(0);
-                    state = State.BUILD_RETURN_PATH;
-                }
-
-                break;
-
-            case BUILD_RETURN_PATH:
-                desiredTag = findDesiredTag();
-
-                if (desiredTag != null) {
-                    calculateRobotPose();
-
-                    path = new Path(new BezierLine(new Pose(fieldX, fieldY), new Pose(140, 20)));
-
-                    path.setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(90));
-
-                    follower.followPath(path);
-
-                    state = State.FOLLOW_RETURN_PATH;
-
-                } else {
-                    stopDrive();
-                }
-
-                break;
-
-            case FOLLOW_RETURN_PATH:
-                follower.update();
-
-                if (!follower.isBusy()) {
-                    stopDrive();
-
-                    fieldX = follower.getPose().getX();
-                    fieldY = follower.getPose().getY();
-                    robotHeading = Math.toRadians(90);
-
-                    state = State.BUILD_PATH;
-                }
-
                 break;
         }
 
         telemetry.addData("State", state);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
-        telemetry.addData("Flywheel Velocity", flywheel.getVelocity());
         telemetry.update();
     }
 

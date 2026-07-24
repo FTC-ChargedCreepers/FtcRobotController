@@ -89,7 +89,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @Autonomous
 @Disabled
-public class AprilTagTrackerV1 extends LinearOpMode {
+public class OLD_AprilTagTrackerV1 extends LinearOpMode {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE =
             150; //  this is how close the camera should get to the target (inches)

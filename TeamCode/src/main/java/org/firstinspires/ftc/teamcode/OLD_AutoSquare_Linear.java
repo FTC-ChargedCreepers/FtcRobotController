@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Autonomous(name = "Auto: Square Loop ChargedCreeper", group = "Linear OpMode")
 @Disabled
-public class AutoSquare_Linear extends LinearOpMode {
+public class OLD_AutoSquare_Linear extends LinearOpMode {
 
     private final ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight, frontLeft, backRight, backLeft;
