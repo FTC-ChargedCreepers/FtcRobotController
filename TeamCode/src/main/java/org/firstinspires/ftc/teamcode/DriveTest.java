@@ -122,16 +122,14 @@ public class DriveTest extends OpMode {
 
         theta = AngleUnit.normalizeDegrees(theta - odo.getHeading(AngleUnit.RADIANS));
 
-        double newForward = r * Math.sin(theta);
+        double newDrive = r * Math.sin(theta);
         double newStrafe = r * Math.cos(theta);
 
-        drive(newForward, newStrafe, turn);
-
         double[] speeds = {
-                (drive + strafe + turn),
-                (drive - strafe - turn),
-                (drive - strafe + turn),
-                (drive + strafe - turn)
+                (newDrive + newStrafe + turn),
+                (newDrive - newStrafe - turn),
+                (newDrive - newStrafe + turn),
+                (newDrive + newStrafe - turn)
         };
 //ericcc
         // Loop through all values in the speeds[] array and find the greatest
@@ -154,14 +152,6 @@ public class DriveTest extends OpMode {
         backRight.setPower(speeds[3]);
         odo.update();
         Pose2D pos = odo.getPosition();
-
-        telemetry.addData(
-                "Motors",
-                "frontLeft (%.2f), frontRight (%.2f), backLeft (%.2f), backRight (%.2f)",
-                speeds[0],
-                speeds[1],
-                speeds[2],
-                speeds[3]);
 
         telemetry.update();
     }
