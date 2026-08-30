@@ -22,6 +22,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
 @Disabled
 @Autonomous(name = "AutoShootV1")
 public class OLD_AutoShootV1 extends OpMode {

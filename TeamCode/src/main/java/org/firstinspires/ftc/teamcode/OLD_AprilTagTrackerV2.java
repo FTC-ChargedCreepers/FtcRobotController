@@ -21,6 +21,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
 @Disabled
 @Autonomous(name = "AprilTag Tracker V2")
 public class OLD_AprilTagTrackerV2 extends OpMode {

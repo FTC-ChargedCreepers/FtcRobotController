@@ -41,7 +41,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
@@ -346,5 +345,4 @@ public class OLD_BasicOpMode_Linear extends OpMode {
         telemetry.addLine("Ready to start");
         telemetry.update();
     }
-
 }
